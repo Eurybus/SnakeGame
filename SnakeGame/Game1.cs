@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
+using System.Diagnostics;
 namespace SnakeGame
 {
     /// <summary>
@@ -11,11 +11,18 @@ namespace SnakeGame
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Texture2D texture;
+        Vector2 texturePos;
+        snake Snake;
 
+        public Vector2 gameArea;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            texturePos = new Vector2(0, 0);
+
+            
         }
 
         /// <summary>
@@ -27,7 +34,8 @@ namespace SnakeGame
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            gameArea.X = Window.ClientBounds.Width;
+            gameArea.Y = Window.ClientBounds.Height;
             base.Initialize();
         }
 
@@ -39,7 +47,15 @@ namespace SnakeGame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            try
+            {
+                Snake = new snake(this.Content.Load<Texture2D>("res/snake_block.png"));
+            }
+            catch (Microsoft.Xna.Framework.Content.ContentLoadException e)
+            {
+                Debug.WriteLine(e.Message);
+                //throw;
+            }
             // TODO: use this.Content to load your game content here
         }
 
@@ -62,6 +78,26 @@ namespace SnakeGame
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            {
+                Snake.Move(new Vector2(-16,0));
+                //if (Snake.HeadLocation.X < gameArea.X) Snake.HeadLocation = new Vector2(0, Snake.HeadLocation.Y);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.D))
+            {
+                Snake.Move(new Vector2(16, 0));
+                //if (Snake.HeadLocation.X > gameArea.X) Snake.HeadLocation = new Vector2(gameArea.X, Snake.HeadLocation.Y);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            {
+                Snake.Move(new Vector2(0, -16));
+                //if (Snake.HeadLocation.Y < gameArea.Y) Snake.HeadLocation = new Vector2(Snake.HeadLocation.X, gameArea.Y);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.S))
+            {
+                Snake.Move(new Vector2(0, 16));
+                //if (Snake.HeadLocation.Y > gameArea.Y) Snake.HeadLocation = new Vector2(Snake.HeadLocation.X, 0);
+            }
             // TODO: Add your update logic here
 
             base.Update(gameTime);
@@ -73,8 +109,12 @@ namespace SnakeGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            spriteBatch.Begin();
+            spriteBatch.Draw(Snake.BlockTexture, Snake.HeadLocation);
+            spriteBatch.End();
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
